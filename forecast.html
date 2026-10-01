@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block title %}Forecasting{% endblock %}
+{% block content %}
+<div class="page-head"><h2>Forecasting</h2><p>{{ ds.name }} — a simple linear-regression trend projected into the future.</p></div>
+<div class="card-x mb-3"><form class="row g-2 align-items-end" data-busy="Forecasting…">
+  <div class="col-md-3"><label class="form-label small fw-bold">Value to forecast</label><select name="target" class="form-select">{% for c in k.numeric %}<option {{ 'selected' if c == target }}>{{ c }}</option>{% endfor %}</select></div>
+  <div class="col-md-3"><label class="form-label small fw-bold">Date column</label><select name="date" class="form-select"><option value="">(none — use row order)</option>{% for c in k.datetime %}<option {{ 'selected' if c == date_col }}>{{ c }}</option>{% endfor %}</select></div>
+  <div class="col-md-2"><label class="form-label small fw-bold">Combine by</label><select name="agg" class="form-select"><option value="sum" {{ 'selected' if agg=='sum' }}>Sum</option><option value="mean" {{ 'selected' if agg=='mean' }}>Average</option></select></div>
+  <div class="col-md-2"><label class="form-label small fw-bold">Periods ahead</label><input type="number" name="periods" min="1" max="36" value="{{ periods }}" class="form-control"></div>
+  <div class="col-md-2"><button class="btn btn-primary w-100" type="submit">Forecast</button></div></form></div>
+{% if error %}<div class="alert alert-warning">{{ error }}</div>{% else %}
+<div class="row g-3 mb-3">
+  <div class="col-md-3"><div class="card-x kpi hover"><div class="ico"><i class="bi bi-graph-{{ 'up' if res.direction=='upward' else 'down' }}-arrow"></i></div><div><div class="val text-capitalize">{{ res.direction }}</div><div class="lbl">Trend direction</div></div></div></div>
+  <div class="col-md-3"><div class="card-x kpi hover"><div class="ico i2"><i class="bi bi-percent"></i></div><div><div class="val">{{ '%+.1f'|format(res.change) }}%</div><div class="lbl">Projected change by end</div></div></div></div>
+  <div class="col-md-3"><div class="card-x kpi hover"><div class="ico i4"><i class="bi bi-bullseye"></i></div><div><div class="val">{{ res.r2 }}</div><div class="lbl">Model fit (R²)</div></div></div></div>
+  <div class="col-md-3"><div class="card-x kpi hover"><div class="ico i3"><i class="bi bi-calendar3"></i></div><div><div class="val">{{ res.points }}</div><div class="lbl">{{ res.flabel|title }}s of history</div></div></div></div>
+</div>
+<div class="card-x mb-3"><div id="fc" class="plot" style="min-height:400px"></div></div>
+<div class="row g-3"><div class="col-lg-5"><div class="card-x"><h5>Forecast values</h5><table class="table table-sm"><thead><tr><th>{{ res.flabel|title }}</th><th class="text-end">{{ target }}</th></tr></thead><tbody>
+  {% for a,b in res.table %}<tr><td>{{ a }}</td><td class="text-end fw-bold">{{ b }}</td></tr>{% endfor %}</tbody></table></div></div>
+  <div class="col-lg-7"><div class="card-x h-100"><h5>How to read this</h5><p class="mb-2">A straight line was fitted to your history. It slopes <b>{{ res.direction }}</b> by about <b>{{ res.slope }}</b> per {{ res.flabel }}. The shaded band shows a likely range (±1.96 × typical error).</p>
+    <p class="mb-2 text-muted small">{% if res.r2 < 0.3 %}The fit is weak — the data doesn't follow a clear straight-line trend, so treat this forecast with caution.{% elif res.r2 < 0.7 %}The fit is moderate — the trend is visible but there is noticeable variation.{% else %}The fit is strong — the data follows the trend closely.{% endif %}</p>
+    {% if not res.dates_used %}<p class="text-muted small mb-0">No date column selected, so rows are treated as consecutive time steps.</p>{% endif %}</div></div></div>
+{% endif %}
+{% endblock %}
+{% block scripts %}{% if res %}<script>plot('fc', {{ res.fig|tojson }});</script>{% endif %}{% endblock %}

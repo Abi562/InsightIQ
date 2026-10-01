@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% block title %}Settings{% endblock %}
+{% block content %}
+<div class="page-head"><h2>Settings</h2><p>Your profile and analysis defaults.</p></div>
+<div class="row g-3">
+  <div class="col-lg-6"><div class="card-x h-100"><h5><i class="bi bi-person text-primary me-2"></i>Profile &amp; defaults</h5>
+    <form method="post"><input type="hidden" name="action" value="profile">
+      <div class="mb-3"><label class="form-label fw-bold small">Name</label><input name="name" class="form-control" value="{{ u.name }}" required></div>
+      <div class="mb-3"><label class="form-label fw-bold small">Email</label><input class="form-control" value="{{ u.email }}" disabled></div>
+      <div class="row g-2 mb-3"><div class="col"><label class="form-label fw-bold small">Default anomaly share (0.01–0.25)</label><input type="number" step="0.01" min="0.01" max="0.25" name="contamination" class="form-control" value="{{ u.contamination }}"></div>
+        <div class="col"><label class="form-label fw-bold small">Default forecast periods</label><input type="number" min="1" max="36" name="horizon" class="form-control" value="{{ u.horizon }}"></div></div>
+      <button class="btn btn-primary">Save settings</button></form></div></div>
+  <div class="col-lg-6"><div class="card-x mb-3"><h5><i class="bi bi-key text-primary me-2"></i>Change password</h5>
+    <form method="post"><input type="hidden" name="action" value="password">
+      <div class="mb-2"><input type="password" name="current" class="form-control" placeholder="Current password" required></div>
+      <div class="mb-3"><input type="password" name="new" class="form-control" placeholder="New password (min 6 characters)" minlength="6" required></div>
+      <button class="btn btn-navy">Update password</button></form></div>
+    <div class="card-x"><h5 class="text-danger"><i class="bi bi-exclamation-octagon me-2"></i>Delete my data</h5>
+      <p class="small text-muted">Removes all your datasets, documents and history. Your account stays.</p>
+      <form method="post" onsubmit="return confirm('Delete ALL your datasets, documents and history?')"><input type="hidden" name="action" value="wipe"><button class="btn btn-outline-danger">Delete all data</button></form></div></div>
+</div>
+{% endblock %}

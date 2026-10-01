@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+{% block title %}Reports{% endblock %}
+{% block content %}
+<div class="page-head"><h2>Reports</h2><p>Generate a printable summary of profiling, insights, anomalies, forecast and model results.</p></div>
+{% if datasets %}<div class="row g-3">{% for d in datasets %}
+<div class="col-md-6 col-xl-4"><div class="card-x hover h-100"><div class="d-flex gap-3 align-items-center mb-3"><div class="kpi"><div class="ico"><i class="bi bi-file-earmark-bar-graph"></i></div></div>
+  <div><div class="fw-bold">{{ d.name }}</div><div class="small text-muted">{{ '{:,}'.format(d.rows) }} rows · {{ d.cols }} cols · quality {{ d.quality }}%</div></div></div>
+  <a class="btn btn-primary btn-sm" href="{{ url_for('main.report_view', ds_id=d.id) }}"><i class="bi bi-eye me-1"></i>View / print</a>
+  <a class="btn btn-outline-primary btn-sm" href="{{ url_for('main.report_download', ds_id=d.id) }}"><i class="bi bi-download me-1"></i>Download HTML</a></div></div>{% endfor %}</div>
+{% else %}<div class="card-x text-center py-5"><p class="text-muted">Upload a dataset to generate a report.</p><a class="btn btn-primary" href="{{ url_for('main.upload') }}">Upload dataset</a></div>{% endif %}
+{% endblock %}

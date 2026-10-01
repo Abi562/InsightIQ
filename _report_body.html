@@ -1,0 +1,22 @@
+<div class="card-x mb-3"><h4 class="mb-1">InsightIQ analysis report</h4>
+  <div class="text-muted">Dataset: <b>{{ r.ds.name }}</b> · Generated {{ now }} UTC</div></div>
+<div class="card-x mb-3"><h5>1. Overview &amp; data quality</h5>
+  <p class="mb-2">{{ '{:,}'.format(r.p.rows) }} rows, {{ r.p.cols }} columns, {{ '{:,}'.format(r.p.missing) }} missing cells and {{ r.p.duplicates }} duplicate rows.
+  Data quality score: <b>{{ r.p.score }}% ({{ r.p.label }})</b> — completeness {{ r.p.parts['Completeness'] }}%, uniqueness {{ r.p.parts['Uniqueness'] }}%, column validity {{ r.p.parts['Column validity'] }}%.</p>
+  <table class="table table-sm"><thead><tr><th>Column</th><th>Kind</th><th>Missing</th><th>Unique</th></tr></thead><tbody>
+  {% for c in r.p.columns %}<tr><td>{{ c.name }}</td><td>{{ c.kind }}</td><td>{{ c.missing }} ({{ c.missing_pct }}%)</td><td>{{ c.unique }}</td></tr>{% endfor %}</tbody></table></div>
+{% if r.p.stats %}<div class="card-x mb-3"><h5>2. Key statistics</h5><table class="table table-sm"><thead><tr><th>Column</th><th>Mean</th><th>Min</th><th>Median</th><th>Max</th><th>Std dev</th></tr></thead><tbody>
+  {% for s in r.p.stats %}<tr><td>{{ s.name }}</td>{% for k in ['mean','min','median','max','std'] %}<td>{{ '{:,.2f}'.format(s[k]) if s[k] is not none else '—' }}</td>{% endfor %}</tr>{% endfor %}</tbody></table></div>{% endif %}
+<div class="card-x mb-3"><h5>3. Key insights</h5><ul class="mb-0">{% for i in r.ins %}<li class="mb-1"><b>{{ i.title }}:</b> {{ i.text }}</li>{% endfor %}</ul></div>
+<div class="card-x mb-3"><h5>4. Anomaly detection (Isolation Forest, 5%)</h5>
+  {% if r.anomaly %}<p>{{ r.anomaly.count }} anomalous rows found ({{ r.anomaly.pct }}% of the data). Most unusual rows:</p>
+  <div style="overflow-x:auto"><table class="table table-sm"><thead><tr>{% for c in r.anomaly.cols %}<th>{{ c }}</th>{% endfor %}</tr></thead><tbody>{% for row in r.anomaly.rows %}<tr>{% for v in row %}<td>{{ v }}</td>{% endfor %}</tr>{% endfor %}</tbody></table></div>
+  {% else %}<p class="text-muted mb-0">Not available — the dataset has no suitable numeric columns.</p>{% endif %}</div>
+<div class="card-x mb-3"><h5>5. Forecast (linear regression)</h5>
+  {% if r.fc %}<p>{{ r.fc.target }} shows an <b>{{ r.fc.direction }}</b> trend (R² = {{ r.fc.r2 }}); projected change over the next 6 {{ r.fc.flabel }}s: <b>{{ '%+.1f'|format(r.fc.change) }}%</b>.</p>
+  <table class="table table-sm"><thead><tr><th>{{ r.fc.flabel|title }}</th><th>Forecast</th></tr></thead><tbody>{% for a,b in r.fc.table %}<tr><td>{{ a }}</td><td>{{ b }}</td></tr>{% endfor %}</tbody></table>
+  {% else %}<p class="text-muted mb-0">Not available — a numeric column with enough history is required.</p>{% endif %}</div>
+<div class="card-x mb-3"><h5>6. Prediction model (Random Forest)</h5>
+  {% if r.model %}<p>{{ r.model.task }} model predicting <b>{{ r.model.target }}</b>. {% for n,v in r.model.metrics %}{{ n }}: <b>{{ v }}</b>{{ '; ' if not loop.last }}{% endfor %}.</p>
+  <p class="mb-0">Most important drivers: {% for n,v in r.model.top %}<b>{{ n }}</b> ({{ v }}%){{ ', ' if not loop.last }}{% endfor %}.</p>
+  {% else %}<p class="text-muted mb-0">Not available for this dataset.</p>{% endif %}</div>

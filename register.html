@@ -1,0 +1,17 @@
+{% extends "auth_base.html" %}
+{% block title %}Create account{% endblock %}
+{% block content %}
+<h4 class="mb-3">Create your account</h4>
+<form method="post">
+  <div class="mb-3"><label class="form-label fw-semibold">Full name</label>
+    <input type="text" name="name" class="form-control" required value="{{ request.form.get('name','') }}"></div>
+  <div class="mb-3"><label class="form-label fw-semibold">Email</label>
+    <input type="email" name="email" class="form-control" required value="{{ request.form.get('email','') }}"></div>
+  <div class="row g-2 mb-3">
+    <div class="col"><label class="form-label fw-semibold">Password</label><input type="password" name="password" class="form-control" minlength="6" required></div>
+    <div class="col"><label class="form-label fw-semibold">Confirm</label><input type="password" name="confirm" class="form-control" minlength="6" required></div>
+  </div>
+  <button class="btn btn-primary w-100 py-2" type="submit">Create account</button>
+</form>
+<div class="text-center mt-3 small">Already registered? <a href="{{ url_for('main.login') }}" class="fw-bold">Sign in</a></div>
+{% endblock %}

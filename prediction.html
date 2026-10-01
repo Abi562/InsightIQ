@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% block title %}ML Prediction{% endblock %}
+{% block content %}
+<div class="page-head"><h2>ML prediction</h2><p>{{ ds.name }} — a Random Forest learns to predict one column from the others.</p></div>
+<div class="card-x mb-3"><form method="get" class="row g-2 align-items-end" data-busy="Training model…">
+  <div class="col-md-6"><label class="form-label small fw-bold">Column to predict (target)</label><select name="target" class="form-select">{% for c in cols %}<option {{ 'selected' if c == target }}>{{ c }}</option>{% endfor %}</select></div>
+  <div class="col-md-3"><button class="btn btn-primary" type="submit"><i class="bi bi-cpu me-1"></i>Train model</button></div></form></div>
+{% if error %}<div class="alert alert-warning">{{ error }}</div>{% else %}
+<div class="row g-3 mb-3">
+  <div class="col-md-3"><div class="card-x kpi hover"><div class="ico i3"><i class="bi bi-diagram-3"></i></div><div><div class="val fs-5">{{ b.task }}</div><div class="lbl">Model task · {{ '{:,}'.format(b.rows) }} rows</div></div></div></div>
+  {% for n,v in b.metrics %}<div class="col-md-3"><div class="card-x kpi hover"><div class="ico {{ 'i4' if loop.first else 'i5' }}"><i class="bi bi-bullseye"></i></div><div><div class="val">{{ v }}</div><div class="lbl">{{ n }}</div></div></div></div>{% endfor %}
+</div>
+<div class="row g-3 mb-3">
+  <div class="col-lg-6"><div class="card-x"><div id="imp" class="plot"></div></div></div>
+  <div class="col-lg-6"><div class="card-x"><div id="fit" class="plot"></div></div></div>
+</div>
+<div class="card-x"><h5><i class="bi bi-magic text-primary me-2"></i>Try a prediction for <span class="text-primary">{{ target }}</span></h5>
+  <form method="post" class="row g-3">
+    <input type="hidden" name="target" value="{{ target }}"><input type="hidden" name="predict" value="1">
+    {% for f in b.top_features %}<div class="col-md-3 col-sm-6"><label class="form-label small fw-bold">{{ f }}</label>
+      {% if f in b.cats %}<select name="f_{{ f }}" class="form-select">{% for o in b.options[f] %}<option {{ 'selected' if (form.get('f_'+f) == o) or (not form.get('f_'+f) and o == b.modes[f]) }}>{{ o }}</option>{% endfor %}</select>
+      {% else %}<input type="number" step="any" name="f_{{ f }}" class="form-control" value="{{ form.get('f_'+f) or b.medians[f]|round(2) }}">{% endif %}</div>{% endfor %}
+    <div class="col-12"><button class="btn btn-primary" type="submit">Predict {{ target }}</button>
+      <span class="text-muted small ms-2">Features not shown use typical values.</span></div>
+  </form>
+  {% if result %}<div class="answer mt-3"><i class="bi bi-stars text-primary me-1"></i>Predicted {{ target }}: <span class="text-primary">{{ result.value }}</span>
+    {% if result.extra %}<div class="small fw-semibold text-muted mt-1">Confidence: {% for c,p in result.extra %}{{ c }} {{ p }}{{ ' · ' if not loop.last }}{% endfor %}</div>{% endif %}</div>{% endif %}
+</div>
+{% endif %}
+{% endblock %}
+{% block scripts %}{% if b %}<script>plot('imp', {{ b.fig_imp|tojson }}); plot('fit', {{ b.fig_fit|tojson }});</script>{% endif %}{% endblock %}

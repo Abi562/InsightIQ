@@ -1,0 +1,11 @@
+{% set icons = {'upload':'cloud-arrow-up','insights':'lightbulb','chart':'bar-chart-line','anomaly':'shield-exclamation','forecast':'graph-up','prediction':'cpu','ask':'chat-dots','document':'file-earmark-text','report':'file-earmark-bar-graph'} %}
+<div class="timeline">
+{% set items = recent if recent is defined else rows %}
+{% for r in items %}
+  <div class="item"><div class="dot"><i class="bi bi-{{ icons.get(r.action,'activity') }}"></i></div>
+    <div class="flex-grow-1"><div class="fw-semibold">{{ r.detail }}</div><div class="small text-muted">{{ r.action|title }} · {{ r.created_at }} UTC</div></div>
+    {% if r.ref_type == 'dataset' %}<a class="btn btn-sm btn-outline-primary" href="{{ url_for('main.select_dataset', ds_id=r.ref_id, next=url_for({'ask':'main.ask','anomaly':'main.anomalies','forecast':'main.forecast','prediction':'main.prediction','chart':'main.charts','insights':'main.insights','report':'main.reports'}.get(r.action,'main.profile'))) }}">Open</a>
+    {% elif r.ref_type == 'document' %}<a class="btn btn-sm btn-outline-primary" href="{{ url_for('main.document_view', doc_id=r.ref_id) }}">Open</a>{% endif %}
+  </div>
+{% else %}<p class="text-muted mb-0 py-3">No activity yet. Your analyses will appear here.</p>{% endfor %}
+</div>

@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block title %}{{ d.name }}{% endblock %}
+{% block content %}
+<div class="page-head d-flex justify-content-between flex-wrap gap-2"><div><h2>{{ d.name }}</h2><p>Extracted text, statistics and keyword search.</p></div>
+  <div><a href="{{ url_for('main.documents') }}" class="btn btn-outline-secondary"><i class="bi bi-arrow-left"></i> All documents</a></div></div>
+<div class="row g-3 mb-3">
+  {% for ico,cls,val,lbl in [('fonts','',('{:,}'.format(st.words)),'Words'),('text-paragraph','i2',st.paragraphs,'Paragraphs'),('chat-square-text','i3',st.sentences,'Sentences'),('clock','i4',st.reading|string+' min','Reading time')] %}
+  <div class="col-6 col-xl-3"><div class="card-x hover kpi"><div class="ico {{ cls }}"><i class="bi bi-{{ ico }}"></i></div><div><div class="val">{{ val }}</div><div class="lbl">{{ lbl }}</div></div></div></div>{% endfor %}
+</div>
+<div class="row g-3 mb-3">
+  <div class="col-lg-5"><div class="card-x h-100"><h5>Document statistics</h5><table class="table table-sm mb-0"><tbody>
+    <tr><td>Characters</td><td class="text-end fw-bold">{{ '{:,}'.format(st.chars) }}</td></tr>
+    <tr><td>Unique words</td><td class="text-end fw-bold">{{ '{:,}'.format(st.unique_words) }}</td></tr>
+    <tr><td>Average word length</td><td class="text-end fw-bold">{{ st.avg_word }}</td></tr>
+    <tr><td>Average sentence length</td><td class="text-end fw-bold">{{ st.avg_sentence }} words</td></tr>
+    {% if st.pages %}<tr><td>Pages</td><td class="text-end fw-bold">{{ st.pages }}</td></tr>{% endif %}</tbody></table></div></div>
+  <div class="col-lg-7"><div class="card-x"><div id="kw" class="plot sm"></div></div></div>
+</div>
+<div class="card-x mb-3"><h5><i class="bi bi-search text-primary me-2"></i>Keyword search</h5>
+  <form class="d-flex gap-2 mb-3"><input name="q" value="{{ q }}" class="form-control" placeholder="Search this document…"><button class="btn btn-primary">Search</button></form>
+  {% if q %}<div class="fw-bold mb-2">{{ count }} match(es) for “{{ q }}”{% if count > snips|length %} <span class="text-muted fw-normal small">(showing first {{ snips|length }})</span>{% endif %}</div>
+  {% for s in snips %}<div class="snippet">{{ s }}</div>{% else %}<p class="text-muted">No matches found.</p>{% endfor %}
+  {% else %}<div class="small fw-bold text-muted mb-2">Click a keyword to search for it</div>
+  {% for k,v in st.keywords %}<a class="chip text-decoration-none" href="{{ url_for('main.document_view', doc_id=d.id, q=k) }}">{{ k }} <span class="text-muted">{{ v }}</span></a>{% endfor %}{% endif %}</div>
+<div class="card-x"><h5>Extracted text {% if d.text|length > 3000 %}<span class="text-muted fw-normal small">(first 3,000 characters)</span>{% endif %}</h5><div class="doctext">{{ preview }}</div></div>
+{% endblock %}
+{% block scripts %}<script>plot('kw', {{ fig|tojson }});</script>{% endblock %}

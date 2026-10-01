@@ -1,0 +1,16 @@
+Quarterly Business Review - Retail Division
+
+Executive summary
+Sales grew steadily across all regions this quarter, driven mainly by strong demand for electronics and clothing. The North region delivered the highest revenue, while the West region showed the fastest customer growth. Customer satisfaction improved after the new loyalty program launched in March.
+
+Key risks
+Discounting remains a concern. Deeper discounts increased unit volume but reduced profit margin and, in some cases, customer rating. Supply chain delays in furniture products created stock shortages in the South region. Management recommends tighter discount controls and better inventory forecasting.
+
+Opportunities
+Analytics shows that customers who buy electronics are likely to purchase accessories within thirty days. A targeted marketing campaign could raise average order value. Expanding the loyalty program to groceries may improve retention and customer satisfaction.
+
+Next steps
+1. Review discount policy and set limits per category.
+2. Improve demand forecasting for furniture and electronics.
+3. Investigate unusual sales spikes flagged by anomaly detection.
+4. Report customer rating trends monthly to regional managers.

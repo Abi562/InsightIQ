@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% block title %}Charts{% endblock %}
+{% block content %}
+<div class="page-head"><h2>Interactive charts</h2><p>{{ ds.name }} — hover, zoom and pan. Build your own chart below.</p></div>
+<div class="card-x mb-3"><h5><i class="bi bi-sliders text-primary me-2"></i>Chart builder</h5>
+  <div class="row g-2 align-items-end">
+    <div class="col-6 col-md-2"><label class="form-label small fw-bold">Chart type</label>
+      <select id="ctype" class="form-select"><option value="bar">Bar</option><option value="line">Line</option><option value="scatter">Scatter</option><option value="histogram">Histogram</option><option value="box">Box plot</option><option value="pie">Pie</option><option value="heatmap">Correlation heatmap</option></select></div>
+    <div class="col-6 col-md-3"><label class="form-label small fw-bold" id="xlabel">X axis / category</label><select id="cx" class="form-select">{% for c in cols %}<option>{{ c }}</option>{% endfor %}</select></div>
+    <div class="col-6 col-md-3"><label class="form-label small fw-bold">Y axis / value</label><select id="cy" class="form-select"><option value="">(none — count)</option>{% for c in k.numeric %}<option>{{ c }}</option>{% endfor %}</select></div>
+    <div class="col-6 col-md-2"><label class="form-label small fw-bold">Aggregation</label><select id="cagg" class="form-select"><option value="mean">Average</option><option value="sum">Sum</option><option value="count">Count</option><option value="median">Median</option><option value="max">Max</option><option value="min">Min</option></select></div>
+    <div class="col-12 col-md-2"><button id="build" class="btn btn-primary w-100">Build chart</button></div>
+  </div>
+  <div id="cerr" class="alert alert-warning py-2 mt-3 d-none"></div>
+  <div id="custom" class="plot mt-3" style="min-height:380px"></div>
+</div>
+<div class="row g-3">{% for c in auto %}<div class="col-lg-6"><div class="card-x"><div id="auto{{ loop.index }}" class="plot"></div></div></div>{% endfor %}</div>
+{% if not auto %}<div class="alert alert-info">This dataset has no columns suitable for automatic charts. Use the builder above.</div>{% endif %}
+{% endblock %}
+{% block scripts %}<script>
+{% for c in auto %}plot('auto{{ loop.index }}', {{ c|tojson }});{% endfor %}
+const $ = id => document.getElementById(id);
+async function build() {
+  const q = new URLSearchParams({type: $('ctype').value, x: $('cx').value, y: $('cy').value, agg: $('cagg').value});
+  $('cerr').classList.add('d-none');
+  try {
+    const r = await fetch('/api/chart?' + q); const j = await r.json();
+    if (!r.ok) { $('cerr').textContent = j.error || 'Could not build chart.'; $('cerr').classList.remove('d-none'); return; }
+    Plotly.purge('custom'); plot('custom', j);
+  } catch (e) { $('cerr').textContent = 'Network error while building the chart.'; $('cerr').classList.remove('d-none'); }
+}
+$('build').addEventListener('click', build);
+{% if k.datetime and k.numeric %}$('ctype').value='line'; $('cx').value='{{ k.datetime[0] }}'; $('cy').value='{{ k.numeric[0] }}'; $('cagg').value='sum';{% elif k.categorical and k.numeric %}$('cx').value='{{ k.categorical[0] }}'; $('cy').value='{{ k.numeric[0] }}';{% endif %}
+build();
+</script>{% endblock %}

@@ -1,0 +1,9 @@
+{% extends "base.html" %}
+{% block title %}Insights{% endblock %}
+{% block content %}
+<div class="page-head"><h2>Data insights</h2><p>{{ ds.name }} — automatically generated from averages, ranges, correlations and patterns.</p></div>
+<div class="row g-3">
+{% for i in items %}<div class="col-lg-6"><div class="card-x hover insight {{ i.level }} h-100"><div class="ico"><i class="bi bi-{{ i.icon }}"></i></div><div><h6>{{ i.title }}</h6><p>{{ i.text }}</p></div></div></div>{% endfor %}
+</div>
+<div class="mt-4 no-print"><a href="{{ url_for('main.charts') }}" class="btn btn-primary">Next: explore charts <i class="bi bi-arrow-right"></i></a></div>
+{% endblock %}

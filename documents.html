@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block title %}Documents{% endblock %}
+{% block content %}
+<div class="page-head"><h2>Document intelligence</h2><p>Upload a PDF, DOCX or TXT file to extract text, see statistics and search keywords.</p></div>
+<div class="row g-3 mb-3">
+  <div class="col-lg-6"><div class="card-x h-100"><form method="post" enctype="multipart/form-data" data-busy="Extracting text…">
+    <div class="dropzone mb-3"><i class="bi bi-file-earmark-arrow-up"></i><div class="fw-bold mt-2">Drag &amp; drop or click to choose a document</div>
+      <div class="text-muted small">.pdf, .docx or .txt · up to 25 MB</div><div class="fname fw-bold text-primary mt-2"></div>
+      <input type="file" name="file" accept=".pdf,.docx,.txt" hidden></div>
+    <button class="btn btn-primary w-100" type="submit"><i class="bi bi-upload me-1"></i>Upload and analyse</button></form>
+    <hr><form method="post" action="{{ url_for('main.document_demo') }}"><button class="btn btn-outline-primary w-100"><i class="bi bi-magic me-1"></i>Or analyse a sample business document</button></form></div></div>
+  <div class="col-lg-6"><div class="card-x h-100"><h5>Search across all documents</h5>
+    <form class="d-flex gap-2"><input name="q" value="{{ q }}" class="form-control" placeholder="Keyword or phrase…"><button class="btn btn-navy"><i class="bi bi-search"></i></button></form>
+    {% if q %}<div class="small text-muted mt-2">{{ docs|length }} document(s) contain “{{ q }}”. <a href="{{ url_for('main.documents') }}">Clear</a></div>{% endif %}</div></div>
+</div>
+<div class="card-x"><h5>Your documents</h5>
+{% for d in docs %}<div class="py-3 border-bottom"><div class="d-flex align-items-center gap-3 flex-wrap">
+    <div class="ico kpi" style="width:auto"><div class="ico i2"><i class="bi bi-file-earmark-{{ 'pdf' if d.ext=='pdf' else 'word' if d.ext=='docx' else 'text' }}"></i></div></div>
+    <div class="flex-grow-1"><div class="fw-bold">{{ d.name }}</div><div class="small text-muted">{{ '{:,}'.format(d.words) }} words{% if d.pages %} · {{ d.pages }} pages{% endif %} · {{ d.created }} UTC{% if q %} · <b>{{ d.hits }} match(es)</b>{% endif %}</div></div>
+    <a class="btn btn-sm btn-primary" href="{{ url_for('main.document_view', doc_id=d.id, q=q) }}">Open</a>
+    <form method="post" action="{{ url_for('main.document_delete', doc_id=d.id) }}" onsubmit="return confirm('Delete this document?')"><button class="btn btn-sm btn-outline-danger" aria-label="Delete"><i class="bi bi-trash"></i></button></form></div>
+  {% for s in d.snips %}<div class="snippet mt-2">{{ s }}</div>{% endfor %}</div>
+{% else %}<p class="text-muted mb-0">{{ 'No documents match that keyword.' if q else 'No documents yet. Upload one above.' }}</p>{% endfor %}
+</div>
+{% endblock %}

@@ -1,0 +1,7 @@
+{% extends "auth_base.html" %}
+{% block title %}Error {{ code }}{% endblock %}
+{% block content %}
+<div class="text-center"><div class="display-4 fw-bold text-primary">{{ code }}</div>
+<p class="mb-3">{{ message }}</p>
+<a class="btn btn-primary" href="{{ url_for('main.dashboard') }}">Back to dashboard</a></div>
+{% endblock %}

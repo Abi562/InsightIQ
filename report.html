@@ -1,0 +1,9 @@
+{% extends "base.html" %}
+{% block title %}Report{% endblock %}
+{% block content %}
+<div class="d-flex gap-2 mb-3 no-print flex-wrap">
+  <a class="btn btn-outline-secondary" href="{{ url_for('main.reports') }}"><i class="bi bi-arrow-left"></i> Reports</a>
+  <button class="btn btn-primary" onclick="window.print()"><i class="bi bi-printer me-1"></i>Print / save as PDF</button>
+  <a class="btn btn-outline-primary" href="{{ url_for('main.report_download', ds_id=r.ds.id) }}"><i class="bi bi-download me-1"></i>Download HTML</a></div>
+{% include "_report_body.html" %}
+{% endblock %}

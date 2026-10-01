@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+{% block title %}Dashboard{% endblock %}
+{% block content %}
+<div class="hero mb-4">
+  <svg viewBox="0 0 300 200" aria-hidden="true"><g stroke="#fff" fill="none" stroke-width="1.2"><polyline points="10,150 60,110 110,130 160,60 210,80 270,20"/><line x1="10" y1="180" x2="290" y2="180"/></g>
+    <g fill="#fff"><circle cx="60" cy="110" r="4"/><circle cx="160" cy="60" r="4"/><circle cx="270" cy="20" r="4"/></g></svg>
+  <h3 class="mb-1">Welcome back, {{ user_name.split(' ')[0] }}</h3>
+  <p>Turn raw data into decisions: upload a dataset, profile it, find patterns, then forecast and predict.</p>
+</div>
+<div class="row g-3 mb-4">
+  {% for ico,cls,val,lbl in [('database','','%d'|format(stats.datasets),'Datasets'),('file-earmark-text','i2','%d'|format(stats.docs),'Documents'),('activity','i3','%d'|format(stats.analyses),'Analyses run'),('shield-check','i4',('%.0f%%'|format(stats.quality) if stats.quality is not none else '—'),'Avg. data quality')] %}
+  <div class="col-6 col-xl-3"><div class="card-x hover kpi"><div class="ico {{ cls }}"><i class="bi bi-{{ ico }}"></i></div><div><div class="val">{{ val }}</div><div class="lbl">{{ lbl }}</div></div></div></div>
+  {% endfor %}
+</div>
+<div class="card-x mb-4"><h5><i class="bi bi-signpost-split text-primary me-2"></i>Analysis workflow</h5>
+  <div class="flow">
+    <a href="{{ url_for('main.upload') }}"><i class="bi bi-cloud-arrow-up"></i>Upload</a>
+    <a href="{{ url_for('main.profile') }}"><i class="bi bi-clipboard2-data"></i>Profile</a>
+    <a href="{{ url_for('main.insights') }}"><i class="bi bi-lightbulb"></i>Insights</a>
+    <a href="{{ url_for('main.charts') }}"><i class="bi bi-bar-chart-line"></i>Charts</a>
+    <a href="{{ url_for('main.anomalies') }}"><i class="bi bi-shield-exclamation"></i>Anomalies</a>
+    <a href="{{ url_for('main.forecast') }}"><i class="bi bi-graph-up"></i>Forecast</a>
+    <a href="{{ url_for('main.prediction') }}"><i class="bi bi-cpu"></i>Predict</a>
+    <a href="{{ url_for('main.ask') }}"><i class="bi bi-chat-dots"></i>Ask data</a>
+    <a href="{{ url_for('main.documents') }}"><i class="bi bi-file-earmark-text"></i>Documents</a>
+    <a href="{{ url_for('main.reports') }}"><i class="bi bi-file-earmark-bar-graph"></i>Reports</a>
+  </div>
+</div>
+{% if ds %}
+<div class="row g-3 mb-4">
+  <div class="col-lg-4"><div class="card-x h-100"><h5>Active dataset</h5>
+    <div class="fw-bold fs-5 text-truncate">{{ ds.name }}</div>
+    <div class="text-muted small mb-3">{{ '{:,}'.format(prof.rows) }} rows · {{ prof.cols }} columns · {{ prof.missing }} missing cells</div>
+    <div class="d-flex align-items-center gap-2 mb-1"><span class="fw-bold">Quality score</span><span class="badge bg-primary">{{ prof.label }}</span></div>
+    <div class="progress mb-3" style="height:10px"><div class="progress-bar" style="width:{{ prof.score }}%"></div></div>
+    <div class="fw-bold fs-3 text-primary mb-2">{{ prof.score }}%</div>
+    <a class="btn btn-primary btn-sm" href="{{ url_for('main.profile') }}">View profile</a>
+    <a class="btn btn-outline-primary btn-sm" href="{{ url_for('main.insights') }}">All insights</a></div></div>
+  {% for c in charts %}
+  <div class="col-lg-4"><div class="card-x h-100"><div id="dash{{ loop.index }}" class="plot sm"></div></div></div>
+  {% endfor %}
+</div>
+{% if ins %}<h5 class="mb-3">Latest insights</h5>
+<div class="row g-3 mb-4">{% for i in ins %}<div class="col-md-6"><div class="card-x insight {{ i.level }}"><div class="ico"><i class="bi bi-{{ i.icon }}"></i></div><div><h6>{{ i.title }}</h6><p>{{ i.text }}</p></div></div></div>{% endfor %}</div>{% endif %}
+{% else %}
+<div class="card-x text-center py-5 mb-4"><i class="bi bi-cloud-arrow-up text-primary" style="font-size:2.6rem"></i>
+  <h5 class="mt-2">No dataset yet</h5><p class="text-muted">Upload your own file or explore InsightIQ with sample retail data.</p>
+  <a href="{{ url_for('main.upload') }}" class="btn btn-primary me-2">Upload dataset</a>
+  <form method="post" action="{{ url_for('main.load_demo') }}" class="d-inline"><button class="btn btn-outline-primary">Load demo data</button></form></div>
+{% endif %}
+<div class="card-x"><div class="d-flex justify-content-between"><h5>Recent activity</h5><a href="{{ url_for('main.history') }}" class="small fw-bold">View all</a></div>
+  {% include "_timeline.html" %}</div>
+{% endblock %}
+{% block scripts %}<script>
+{% for c in charts %}plot('dash{{ loop.index }}', {{ c|tojson }});{% endfor %}
+</script>{% endblock %}

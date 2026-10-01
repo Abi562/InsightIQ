@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% block title %}Anomaly Detection{% endblock %}
+{% block content %}
+<div class="page-head"><h2>Anomaly detection</h2><p>{{ ds.name }} — Isolation Forest flags rows that look unusual compared with the rest.</p></div>
+<div class="card-x mb-3"><form class="row g-2 align-items-end" data-busy="Detecting…">
+  <div class="col-md-5"><label class="form-label fw-bold small">Expected share of anomalies: <span id="cv">{{ (cont*100)|round|int }}</span>%</label>
+    <input type="range" class="form-range" name="contamination" min="0.01" max="0.25" step="0.01" value="{{ cont }}" oninput="cv.textContent=Math.round(this.value*100)"></div>
+  <div class="col-md-3"><button class="btn btn-primary" type="submit"><i class="bi bi-search me-1"></i>Re-run detection</button></div></form></div>
+{% if error %}<div class="alert alert-warning">{{ error }}</div>{% else %}
+<div class="row g-3 mb-3">
+  <div class="col-md-4"><div class="card-x kpi hover"><div class="ico i5"><i class="bi bi-exclamation-diamond"></i></div><div><div class="val">{{ res.count }}</div><div class="lbl">Anomalies found</div></div></div></div>
+  <div class="col-md-4"><div class="card-x kpi hover"><div class="ico"><i class="bi bi-percent"></i></div><div><div class="val">{{ res.pct }}%</div><div class="lbl">Of {{ '{:,}'.format(res.total) }} rows</div></div></div></div>
+  <div class="col-md-4"><div class="card-x kpi hover"><div class="ico i3"><i class="bi bi-columns-gap"></i></div><div><div class="val">{{ res.features|length }}</div><div class="lbl">Numeric features used</div></div></div></div>
+</div>
+<div class="card-x mb-3"><div id="anfig" class="plot" style="min-height:400px"></div></div>
+<div class="card-x"><h5>Most unusual rows {% if res.count > res.shown %}<span class="text-muted fw-normal small">(top {{ res.shown }} of {{ res.count }})</span>{% endif %}</h5>
+  {% if res.rows %}<div class="table-wrap"><table class="table table-hover table-sm"><thead><tr>{% for c in res.cols %}<th>{{ c }}</th>{% endfor %}</tr></thead>
+  <tbody>{% for r in res.rows %}<tr>{% for v in r %}<td>{{ v }}</td>{% endfor %}</tr>{% endfor %}</tbody></table></div>
+  {% else %}<p class="text-muted mb-0">No anomalies at this sensitivity.</p>{% endif %}</div>
+{% endif %}
+{% endblock %}
+{% block scripts %}{% if res %}<script>plot('anfig', {{ res.fig|tojson }});</script>{% endif %}{% endblock %}

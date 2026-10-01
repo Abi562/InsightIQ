@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block title %}Upload Dataset{% endblock %}
+{% block content %}
+<div class="page-head"><h2>Upload dataset</h2><p>Add a CSV or Excel file. InsightIQ profiles it automatically.</p></div>
+<div class="row g-3">
+  <div class="col-lg-6"><div class="card-x h-100">
+    <form method="post" enctype="multipart/form-data" data-busy="Uploading…">
+      <div class="dropzone mb-3"><i class="bi bi-cloud-arrow-up"></i>
+        <div class="fw-bold mt-2">Drag &amp; drop or click to choose a file</div>
+        <div class="text-muted small">.csv, .xlsx or .xls · up to 25 MB</div>
+        <div class="fname fw-bold text-primary mt-2"></div>
+        <input type="file" name="file" accept=".csv,.xlsx,.xls" hidden></div>
+      <button class="btn btn-primary w-100" type="submit"><i class="bi bi-upload me-1"></i>Upload and profile</button>
+    </form>
+    <hr><form method="post" action="{{ url_for('main.load_demo') }}"><button class="btn btn-outline-primary w-100"><i class="bi bi-magic me-1"></i>Or load the demo retail sales dataset</button></form>
+  </div></div>
+  <div class="col-lg-6"><div class="card-x h-100"><h5>Your datasets</h5>
+    {% if datasets %}<div class="table-wrap"><table class="table align-middle"><thead><tr><th>Name</th><th>Rows</th><th>Cols</th><th>Quality</th><th></th></tr></thead><tbody>
+      {% for d in datasets %}<tr><td class="fw-semibold">{{ d.name }}<div class="small text-muted fw-normal">{{ d.created_at }}</div></td><td>{{ '{:,}'.format(d.rows) }}</td><td>{{ d.cols }}</td>
+        <td><span class="badge {{ 'bg-success' if d.quality >= 90 else 'bg-primary' if d.quality >= 75 else 'bg-warning text-dark' }}">{{ d.quality }}%</span></td>
+        <td class="text-end text-nowrap"><a class="btn btn-sm btn-primary" href="{{ url_for('main.select_dataset', ds_id=d.id) }}">Analyse</a>
+          <form method="post" action="{{ url_for('main.delete_dataset', ds_id=d.id) }}" class="d-inline" onsubmit="return confirm('Delete this dataset?')"><button class="btn btn-sm btn-outline-danger" aria-label="Delete"><i class="bi bi-trash"></i></button></form></td></tr>{% endfor %}
+    </tbody></table></div>
+    {% else %}<p class="text-muted">Nothing uploaded yet.</p>{% endif %}
+  </div></div>
+</div>
+{% endblock %}
